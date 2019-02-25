@@ -1,11 +1,19 @@
 package it.hella.aggregator;
 
-public class Aggregator {
+import lombok.Data;
 
-    public void aggregate() {
+import java.util.function.Consumer;
 
+@Data
+public abstract class Aggregator<T, V> implements Consumer<T> {
+
+    private String name;
+
+    private V value;
+
+    public Aggregator(String name, V initialValue){
+        this.name = name;
+        this.value = initialValue;
     }
-
-
 
 }

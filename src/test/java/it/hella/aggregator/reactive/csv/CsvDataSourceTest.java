@@ -4,6 +4,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
@@ -12,9 +13,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.function.Function;
 
-public class AddressBookTest {
+public class CsvDataSourceTest {
 
-    private static final ClassLoader classLoader = AddressBookTest.class.getClassLoader();
+    private static final ClassLoader classLoader = CsvDataSourceTest.class.getClassLoader();
 
     private static Path path;
 
@@ -48,8 +49,5 @@ public class AddressBookTest {
         broadcastConcurrentPublisher.subscribe(line -> System.out.println(Thread.currentThread().getId() + " D " + line), e -> {}, () -> {});
         connectableFlux.connect();
     }
-
-
-
 
 }
