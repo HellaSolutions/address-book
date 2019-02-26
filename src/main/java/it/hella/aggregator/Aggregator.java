@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 public abstract class Aggregator<T, V> implements Consumer<T> {
 
     private String name;
-
     private V value;
 
     public Aggregator(String name, V initialValue){

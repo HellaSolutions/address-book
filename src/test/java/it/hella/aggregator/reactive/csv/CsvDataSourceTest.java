@@ -4,7 +4,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
@@ -37,7 +36,7 @@ public class CsvDataSourceTest {
     @Test
     public void testConcurrent() {
 
-        Scheduler s = Schedulers.newParallel("parallel-scheduler");
+        Scheduler s = Schedulers.elastic();
         ConnectableFlux<String[]> connectableFlux = CsvDataSource.<String[]>builder().
                 mapper(Function.identity()).
                 build().

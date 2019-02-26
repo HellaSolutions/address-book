@@ -7,12 +7,13 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
+import java.util.Random;
 import java.util.function.Function;
 
-import static org.junit.Assert.*;
-
 public class PipelineTest {
+
+    public static final Integer numberSynchronizationTests = 10;
+    public static final Integer randomDelayBound = 10;
 
     private static final ClassLoader classLoader = CsvDataSourceTest.class.getClassLoader();
 
@@ -24,9 +25,9 @@ public class PipelineTest {
     }
 
     @Test
-    public void builderSynchronizedCollectTest() {
+    public void builderAsynchronousCollectTest() {
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < numberSynchronizationTests; i++) {
             CsvDataSource<String[]> csvDataSource = CsvDataSource.
                     <String[]>builder().
                     mapper(Function.identity()).
@@ -42,14 +43,11 @@ public class PipelineTest {
                         @Override
                         public void accept(String[] o) {
                             this.setValue(this.getValue() + o[1]);
-                            try{ Thread.sleep(100);}catch(Exception e){}
+                            try{ Thread.sleep(new Random().nextInt(randomDelayBound));}catch(Exception e){}
                         }
                     }).build();
-            p.aggregate(path);
-            assertNotEquals(Optional.empty(), p.getResult(0));
-            assertNotEquals(Optional.empty(), p.getResult(1));
-            System.out.println(p.getResult(0));
-            System.out.println(p.getResult(1));
+            p.aggregate(path, System.out::println);
+            try{Thread.sleep(100);}catch(Exception e){}
 
         }
     }
