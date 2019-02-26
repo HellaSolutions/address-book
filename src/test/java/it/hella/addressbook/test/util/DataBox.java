@@ -22,23 +22,23 @@ public class DataBox {
         return null;
     }
 
-    public static final List<String> getRandomCsvAddressBook(int numberOfRecords) {
+    public static final List<String> getRandomCsvAddressBook(int numberOfRecords, String separator) {
         List<String> records = new ArrayList<>();
         for (int k = 0; k < numberOfRecords; k++){
-            records.add(randomRecord());
+            records.add(randomRecord(separator));
         }
         return records;
     }
 
-    public static final String randomRecord() {
+    public static final String randomRecord(String separator) {
         Random r = new Random();
         return new StringBuffer()
                 .append(RandomStringUtils.randomAlphabetic(10))
                 .append(" ")
                 .append(RandomStringUtils.randomAlphabetic(10))
-                .append(", ")
+                .append(separator)
                 .append((r.nextInt(2) == 0) ? "Male" : "Female")
-                .append(", ")
+                .append(separator)
                 .append(randomBirthday()).toString();
     }
 

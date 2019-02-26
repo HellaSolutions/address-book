@@ -1,12 +1,12 @@
 package it.hella.aggregator.reactive.csv;
 
 import it.hella.addressbook.test.util.DataBox;
+import it.hella.aggregator.PipelineTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import reactor.core.publisher.ConnectableFlux;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import java.nio.file.Path;
@@ -18,10 +18,12 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 public class CsvDataSourceTest {
+
+    private static Logger log = LoggerFactory.getLogger(CsvDataSourceTest.class);
 
     private static final int RANDOM_SAMPLE_SIZE = 1000;
 
@@ -56,7 +58,7 @@ public class CsvDataSourceTest {
                 build().
                 stream(path);
         StepVerifier.create(
-                flux.doOnNext(s -> System.out.println(Arrays.toString(s))))
+                flux.doOnNext(s -> log.info(Arrays.toString(s))))
                 .assertNext(s -> is(new String[]{"Bill McKnight", " Male", " 16/03/77"}))
                 .assertNext(s -> is(new String[]{"Paul Robinson", " Male", " 15/01/85"}))
                 .assertNext(s -> is(new String[]{"Gemma Lane", " Female", " 20/11/91"}))
@@ -80,7 +82,7 @@ public class CsvDataSourceTest {
                 build().
                 stream(path);
         StepVerifier.create(
-                flux.doOnNext(s -> System.out.println(Arrays.toString(s))))
+                flux.doOnNext(s -> log.info(Arrays.toString(s))))
                 .assertNext(s -> is(new String[]{"Bill McKnight", "Male", "16/03/77"}))
                 .assertNext(s -> is(new String[]{"Paul Robinson", "Male", "15/01/85"}))
                 .assertNext(s -> is(new String[]{"Gemma Lane", "Female", "20/11/91"}))
@@ -93,7 +95,7 @@ public class CsvDataSourceTest {
     @Test
     public void testRandomDataSource(){
         List<String> records =
-                DataBox.getRandomCsvAddressBook(RANDOM_SAMPLE_SIZE);
+                DataBox.getRandomCsvAddressBook(RANDOM_SAMPLE_SIZE, ", ");
         Flux<String[]> flux = CsvDataSource.<String[]>builder().
                 mapper(Function.identity()).
                 build().
@@ -105,6 +107,26 @@ public class CsvDataSourceTest {
                     assertThat(l.stream().map(
                             r -> r[0] + "," + r[1] + "," + r[2]).
                             collect(Collectors.toList()), is(records)))
+                .expectNextCount(RANDOM_SAMPLE_SIZE).
+                verifyComplete();
+    }
+
+    @Test
+    public void testRandomDataSourceSeparator(){
+        List<String> records =
+                DataBox.getRandomCsvAddressBook(RANDOM_SAMPLE_SIZE, "-");
+        Flux<String[]> flux = CsvDataSource.<String[]>builder().
+                mapper(Function.identity()).
+                separator("-").
+                build().
+                stream(records);
+        StepVerifier.create(flux)
+                .recordWith(ArrayList::new)
+                .thenConsumeWhile(Objects::nonNull)
+                .consumeRecordedWith(l ->
+                        assertThat(l.stream().map(
+                                r -> r[0] + "-" + r[1] + "-" + r[2]).
+                                collect(Collectors.toList()), is(records)))
                 .expectNextCount(RANDOM_SAMPLE_SIZE).
                 verifyComplete();
     }

@@ -23,7 +23,10 @@ public class CsvDataSource<T> {
     }
 
     public final Flux<T> stream(List<String> records){
-        return lines(records).map(line -> mapper.apply(line.split(separator)));
+        return lines(records).map(line -> {
+            mapper.apply(line.split(separator));
+            return mapper.apply(line.split(separator));
+        });
     }
 
     private static final Flux<String> lines(Path path) {

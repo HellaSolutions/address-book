@@ -5,6 +5,9 @@ import it.hella.aggregator.Aggregator;
 import java.time.LocalDate;
 import java.time.Period;
 
+/**
+ * The type Age day diff aggregator.
+ */
 public class AgeDayDiffAggregator extends Aggregator<Address, Integer> {
 
     private String nameA;
@@ -13,6 +16,14 @@ public class AgeDayDiffAggregator extends Aggregator<Address, Integer> {
     private LocalDate dateOfBirthA = null;
     private LocalDate dateOfBirthB = null;
 
+    /**
+     * Calculates the age differences in days between
+     * the first unordered pair of records with names
+     * nameA and nameB
+     *
+     * @param nameA the name a
+     * @param nameB the name b
+     */
     public AgeDayDiffAggregator(String nameA, String nameB){
         super("ageday_diff_counter", -1);
         this.nameA = nameA;
@@ -21,12 +32,13 @@ public class AgeDayDiffAggregator extends Aggregator<Address, Integer> {
 
     @Override
     public void accept(Address address) {
-        if (dateOfBirthA != null && dateOfBirthB != null){
+        if (address.equals(Address.EMPTY) ||
+                (dateOfBirthA != null && dateOfBirthB != null)){
             return;
         }
-        if (address.getName().equalsIgnoreCase(nameA)){
+        if (dateOfBirthA == null && address.getName().equalsIgnoreCase(nameA)){
             dateOfBirthA = address.getBirthDate();
-        } else if (address.getName().equalsIgnoreCase(nameB)) {
+        } else if (dateOfBirthB == null && address.getName().equalsIgnoreCase(nameB)) {
             dateOfBirthB = address.getBirthDate();
         }
         if (dateOfBirthA != null && dateOfBirthB != null){

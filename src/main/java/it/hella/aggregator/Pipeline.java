@@ -1,6 +1,5 @@
 package it.hella.aggregator;
 
-import com.sun.istack.internal.NotNull;
 import it.hella.aggregator.reactive.csv.CsvDataSource;
 import lombok.*;
 import reactor.core.Disposable;
@@ -17,14 +16,26 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+/**
+ * The type Pipeline.
+ *
+ * @param <T> the type parameter
+ * @param <V> the type parameter
+ */
 @Builder
 public class Pipeline<T, V> {
 
+    /**
+     * The Aggregators.
+     */
     @Singular
-    @NotNull
+    @NonNull
     List<Aggregator<T, V>> aggregators;
 
-    @NotNull
+    /**
+     * The Csv data source.
+     */
+    @NonNull
     CsvDataSource<T> csvDataSource;
 
     private Map<String, DisposableIndex> subscribers;
@@ -36,19 +47,40 @@ public class Pipeline<T, V> {
         private Integer aggregatorIndex;
     }
 
+    /**
+     * Each Aggregator subscription is accompanied with
+     * a onComplete implementation that calls the complete
+     * method. The listener retrieves the Aggregator and
+     * publishes it. This produces a Flux of completed
+     * Aggregator(s).
+     *
+     * The user provides a consumer for this Flux to intercept
+     * the Aggregators results.
+     *
+     */
     private class AggregatorListener {
 
-        private FluxSink<V> sink;
+        private FluxSink<Aggregator<T, V>> sink;
         private AtomicInteger activeAggregators;
 
-        void setSink(FluxSink<V> sink){
+        /**
+         * Set sink.
+         *
+         * @param sink the sink
+         */
+        void setSink(FluxSink<Aggregator<T, V>> sink){
             this.sink = sink;
             activeAggregators = new AtomicInteger(aggregators.size());
         }
 
+        /**
+         * Complete.
+         *
+         * @param name the name
+         */
         void complete(String name){
             Integer aggregatorIndex = subscribers.get(name).getAggregatorIndex();
-            sink.next(aggregators.get(aggregatorIndex).getValue());
+            sink.next(aggregators.get(aggregatorIndex));
             if (activeAggregators.decrementAndGet() == 0){
                 sink.complete();
             }
@@ -56,32 +88,75 @@ public class Pipeline<T, V> {
     }
     private final AggregatorListener listener = new AggregatorListener();
 
-    public void aggregate(Path path, Consumer<V> consumer) {
+    /**
+     * Aggregate.
+     *
+     * @param records  the records as iterable
+     * @param consumer the consumer for a Flux of completed Aggregators
+     */
+    public void aggregate(List<String> records, Consumer<Aggregator<T,V>> consumer) {
 
+        runPipeline(csvDataSource.
+                stream(records).publish(), consumer);
+
+    }
+
+    /**
+     * Aggregate.
+     *
+     * @param path     the records as a CSV file
+     * @param consumer the consumer for a Flux of completed Aggregators
+     */
+    public void aggregate(Path path, Consumer<Aggregator<T,V>> consumer) {
+
+        runPipeline(csvDataSource.
+                stream(path).publish(), consumer);
+
+    }
+
+    private void runPipeline(ConnectableFlux<T> connectableFlux, Consumer<Aggregator<T, V>> consumer){
         subscribers = new HashMap<>();
         Scheduler s = Schedulers.elastic();
-        ConnectableFlux<T> connectableFlux = csvDataSource.
-                stream(path).publish();
         Flux<T> broadcastConcurrentPublisher = connectableFlux.publishOn(s);
         int n = 0;
         for(Aggregator<T, V> c : aggregators){
             final int m = n;
             DisposableIndex disposableIndex = new DisposableIndex(
                     broadcastConcurrentPublisher.
-                        subscribe(c, Throwable::printStackTrace,
-                            () -> listener.complete(c.getName())),
+                            subscribe(c, Throwable::printStackTrace,
+                                    () -> listener.complete(c.getName())),
                     m);
             subscribers.put(c.getName(), disposableIndex);
             n++;
         }
         listenerFlux(consumer);
         connectableFlux.connect();
-
     }
 
-    private void listenerFlux(Consumer<V> consumer) {
-        Flux<V> flux = Flux.create(listener::setSink, FluxSink.OverflowStrategy.BUFFER);
+    private void listenerFlux(Consumer<Aggregator<T, V>> consumer) {
+        Flux<Aggregator<T, V>> flux = Flux.create(listener::setSink, FluxSink.OverflowStrategy.BUFFER);
         flux.subscribe(consumer);
     }
+
+    /**
+     * Blocking utility method that retrieves the value computed from a named Aggregator.
+     * Used in tests to avoid time-wasting Thread.sleep calls
+     *
+     * @param name the name
+     * @return the result
+     */
+    V getResult(String name) {
+        if (subscribers == null){
+            throw new IllegalStateException(String.format("No subscribers, you have to call the aggregate method before"));
+        }
+        if (subscribers.containsKey(name)){
+            DisposableIndex disposableIndex = subscribers.get(name);
+            while(!disposableIndex.getDisposable().isDisposed()){}
+            return aggregators.get(disposableIndex.getAggregatorIndex()).getValue();
+        }else{
+           throw new IllegalArgumentException(String.format("Unrecognized aggregator id: " + name));
+        }
+    }
+
 
 }

@@ -10,6 +10,9 @@ public class CountMalesAggregator extends Aggregator<Address, Integer> {
 
     @Override
     public void accept(Address address) {
+        if(address.equals(Address.EMPTY)){
+            return;
+        }
         if (address.getGender().equalsIgnoreCase("male")){
             super.setValue(super.getValue() + 1);
         }
