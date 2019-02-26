@@ -117,9 +117,8 @@ public class AddressBookPipelineTest {
                 aggregator(new MaxAgeAggregator()).
                 aggregator(new CountMalesAggregator()).
                 build();
-        p.aggregate(path, a -> {
-            values.put(a.getName(), a.getValue());
-        });
+        p.aggregate(path, a -> values.put(a.getName(), a.getValue()));
+
         try {Thread.sleep(100); }catch(Exception e){}
         assertEquals(Long.valueOf(2862),
                 values.get("ageday_diff_counter"));
@@ -136,15 +135,15 @@ public class AddressBookPipelineTest {
         final Map<String, Object> values = new HashMap<>();
         Pipeline<Address> p = Pipeline.<Address>builder().
                 csvDataSource(csvDataSource).
-                aggregator(new AgeDayDiffAggregator("Bill", "Paul")).
+                aggregator(new AgeDayDiffAggregator(
+                        getName(sample.get(0)),
+                        getName(sample.get(MASSIVE_SAMPLE_SIZE - 1)))).
                 aggregator(new MaxAgeAggregator()).
                 aggregator(new CountMalesAggregator()).
                 build();
 
         StopWatch stopwatch = StopWatch.createStarted();
-        p.aggregate(sample, a -> {
-            values.put(a.getName(), a.getValue());
-        });
+        p.aggregate(sample, a -> values.put(a.getName(), a.getValue()));
 
         log.info(String.format("age_max %s", p.getResult("age_max")));
         log.info(String.format("males_counter %s", p.getResult("males_counter")));
@@ -154,6 +153,10 @@ public class AddressBookPipelineTest {
 
         assertEquals(3, values.size());
 
+    }
+
+    private String getName(String record){
+        return record.split(",")[0].split(" ")[0];
     }
 
 }
