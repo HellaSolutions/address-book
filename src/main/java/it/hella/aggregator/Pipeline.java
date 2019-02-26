@@ -145,7 +145,7 @@ public class Pipeline<T> {
      * @param name the name
      * @return the result
      */
-    Object getResult(String name) {
+    public Object getResult(String name) {
         if (subscribers == null){
             throw new IllegalStateException(String.format("No subscribers, you have to call the aggregate method before"));
         }
