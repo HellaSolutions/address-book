@@ -11,7 +11,8 @@ public class AddressBookMapper implements Function<String[], Address> {
     @Override
     public Address apply(String[] record) {
         if (record == null || record.length != 3){
-            throw new IllegalArgumentException(String.format("Csv bad format %s", Arrays.toString(record)));
+            return Address.EMPTY;
+            //throw new IllegalArgumentException(String.format("Csv bad format %s", Arrays.toString(record)));
         }
         LocalDate dateOfBirth = LocalDate.parse(record[2].trim(), dateFormatter);
         String[] nameSurname = record[0].split(" ");
