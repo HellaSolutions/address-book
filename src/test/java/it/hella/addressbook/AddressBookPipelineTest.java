@@ -2,17 +2,15 @@ package it.hella.addressbook;
 
 import it.hella.addressbook.test.util.DataBox;
 import it.hella.aggregator.Pipeline;
-import it.hella.aggregator.reactive.csv.CsvDataSource;
-import it.hella.aggregator.reactive.csv.CsvDataSourceTest;
+import it.hella.reactive.csv.CsvDataSource;
+import it.hella.reactive.csv.CsvDataSourceTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.hella.addressbook.test.util.DataBox.toCsvFormat;
@@ -47,8 +45,8 @@ public class AddressBookPipelineTest {
                 .recordWith(ArrayList::new)
                 .thenConsumeWhile(Objects::nonNull)
                 .consumeRecordedWith(l -> assertThat(l.stream().
-                                map(a -> toCsvFormat(a)).
-                                collect(Collectors.toList()),is(sample)))
+                        map(a -> toCsvFormat(a)).
+                        collect(Collectors.toList()),is(sample)))
                 .expectNextCount(RANDOM_SAMPLE_SIZE).
                 verifyComplete();
 
@@ -58,11 +56,11 @@ public class AddressBookPipelineTest {
     public void testMaleCounter() {
 
         final List<Integer> values = new ArrayList<>();
-        Pipeline<Address, Integer> p = Pipeline.<Address, Integer>builder().
+        Pipeline<Address> p = Pipeline.<Address>builder().
                 csvDataSource(csvDataSource).
                 aggregator(new CountMalesAggregator()).build();
         p.aggregate(path, a -> {
-           values.add(a.getValue());
+            values.add((Integer)a.getValue());
         });
         try {Thread.sleep(100); }catch(Exception e){}
         assertEquals(Integer.valueOf(3), values.get(0));
@@ -73,11 +71,11 @@ public class AddressBookPipelineTest {
     public void testMaxAgeCounter() {
 
         final List<Address> values = new ArrayList<>();
-        Pipeline<Address, Address> p = Pipeline.<Address, Address>builder().
+        Pipeline<Address> p = Pipeline.<Address>builder().
                 csvDataSource(csvDataSource).
                 aggregator(new MaxAgeAggregator()).build();
         p.aggregate(path, a -> {
-            values.add(a.getValue());
+            values.add((Address)a.getValue());
         });
         try {Thread.sleep(100); }catch(Exception e){}
         assertEquals(new AddressBookMapper().apply(new String[]{"Wes Jackson", "Male", "14/08/74"}),
@@ -89,15 +87,38 @@ public class AddressBookPipelineTest {
     public void AgeDayDiffAggregator() {
 
         final List<Long> values = new ArrayList<>();
-        Pipeline<Address, Long> p = Pipeline.<Address, Long>builder().
+        Pipeline<Address> p = Pipeline.<Address>builder().
                 csvDataSource(csvDataSource).
                 aggregator(new AgeDayDiffAggregator("Bill", "Paul")).build();
         p.aggregate(path, a -> {
-            values.add(a.getValue());
+            values.add((Long)a.getValue());
         });
         try {Thread.sleep(100); }catch(Exception e){}
         assertEquals(Long.valueOf(2862),
                 values.get(0));
+
+    }
+
+    @Test
+    public void AllAggregators() {
+
+        final Map<String, Object> values = new HashMap<>();
+        Pipeline<Address> p = Pipeline.<Address>builder().
+                csvDataSource(csvDataSource).
+                aggregator(new AgeDayDiffAggregator("Bill", "Paul")).
+                aggregator(new MaxAgeAggregator()).
+                aggregator(new CountMalesAggregator()).
+                build();
+        p.aggregate(path, a -> {
+            values.put(a.getName(), a.getValue());
+        });
+        try {Thread.sleep(100); }catch(Exception e){}
+        assertEquals(Long.valueOf(2862),
+                values.get("ageday_diff_counter"));
+        assertEquals(Integer.valueOf(3),
+                values.get("males_counter"));
+        assertEquals(new AddressBookMapper().apply(new String[]{"Wes Jackson", "Male", "14/08/74"}),
+                values.get("age_max"));
 
     }
 

@@ -1,4 +1,4 @@
-package it.hella.aggregator.reactive.csv;
+package it.hella.reactive.csv;
 
 import lombok.Builder;
 import lombok.NonNull;

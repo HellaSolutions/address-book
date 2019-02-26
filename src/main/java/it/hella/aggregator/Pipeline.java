@@ -1,6 +1,6 @@
 package it.hella.aggregator;
 
-import it.hella.aggregator.reactive.csv.CsvDataSource;
+import it.hella.reactive.csv.CsvDataSource;
 import lombok.*;
 import reactor.core.Disposable;
 import reactor.core.publisher.ConnectableFlux;
@@ -23,14 +23,14 @@ import java.util.function.Consumer;
  * @param <V> the type parameter
  */
 @Builder
-public class Pipeline<T, V> {
+public class Pipeline<T> {
 
     /**
      * The Aggregators.
      */
     @Singular
     @NonNull
-    List<Aggregator<T, V>> aggregators;
+    List<Aggregator<T, ?>> aggregators;
 
     /**
      * The Csv data source.
@@ -60,7 +60,7 @@ public class Pipeline<T, V> {
      */
     private class AggregatorListener {
 
-        private FluxSink<Aggregator<T, V>> sink;
+        private FluxSink<Aggregator<T, ?>> sink;
         private AtomicInteger activeAggregators;
 
         /**
@@ -68,7 +68,7 @@ public class Pipeline<T, V> {
          *
          * @param sink the sink
          */
-        void setSink(FluxSink<Aggregator<T, V>> sink){
+        void setSink(FluxSink<Aggregator<T, ?>> sink){
             this.sink = sink;
             activeAggregators = new AtomicInteger(aggregators.size());
         }
@@ -94,7 +94,7 @@ public class Pipeline<T, V> {
      * @param records  the records as iterable
      * @param consumer the consumer for a Flux of completed Aggregators
      */
-    public void aggregate(List<String> records, Consumer<Aggregator<T,V>> consumer) {
+    public void aggregate(List<String> records, Consumer<Aggregator<T,?>> consumer) {
 
         runPipeline(csvDataSource.
                 stream(records).publish(), consumer);
@@ -107,19 +107,19 @@ public class Pipeline<T, V> {
      * @param path     the records as a CSV file
      * @param consumer the consumer for a Flux of completed Aggregators
      */
-    public void aggregate(Path path, Consumer<Aggregator<T,V>> consumer) {
+    public void aggregate(Path path, Consumer<Aggregator<T,?>> consumer) {
 
         runPipeline(csvDataSource.
                 stream(path).publish(), consumer);
 
     }
 
-    private void runPipeline(ConnectableFlux<T> connectableFlux, Consumer<Aggregator<T, V>> consumer){
+    private void runPipeline(ConnectableFlux<T> connectableFlux, Consumer<Aggregator<T, ?>> consumer){
         subscribers = new HashMap<>();
         Scheduler s = Schedulers.elastic();
         Flux<T> broadcastConcurrentPublisher = connectableFlux.publishOn(s);
         int n = 0;
-        for(Aggregator<T, V> c : aggregators){
+        for(Aggregator<T, ?> c : aggregators){
             final int m = n;
             DisposableIndex disposableIndex = new DisposableIndex(
                     broadcastConcurrentPublisher.
@@ -133,8 +133,8 @@ public class Pipeline<T, V> {
         connectableFlux.connect();
     }
 
-    private void listenerFlux(Consumer<Aggregator<T, V>> consumer) {
-        Flux<Aggregator<T, V>> flux = Flux.create(listener::setSink, FluxSink.OverflowStrategy.BUFFER);
+    private void listenerFlux(Consumer<Aggregator<T, ?>> consumer) {
+        Flux<Aggregator<T, ?>> flux = Flux.create(listener::setSink, FluxSink.OverflowStrategy.BUFFER);
         flux.subscribe(consumer);
     }
 
@@ -145,7 +145,7 @@ public class Pipeline<T, V> {
      * @param name the name
      * @return the result
      */
-    V getResult(String name) {
+    Object getResult(String name) {
         if (subscribers == null){
             throw new IllegalStateException(String.format("No subscribers, you have to call the aggregate method before"));
         }
@@ -154,9 +154,10 @@ public class Pipeline<T, V> {
             while(!disposableIndex.getDisposable().isDisposed()){}
             return aggregators.get(disposableIndex.getAggregatorIndex()).getValue();
         }else{
-           throw new IllegalArgumentException(String.format("Unrecognized aggregator id: " + name));
+            throw new IllegalArgumentException(String.format("Unrecognized aggregator id: " + name));
         }
     }
 
 
 }
+

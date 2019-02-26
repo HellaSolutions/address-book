@@ -2,8 +2,8 @@ package it.hella.aggregator;
 
 import it.hella.addressbook.test.util.DataBox;
 import it.hella.addressbook.test.util.TestAggregator;
-import it.hella.aggregator.reactive.csv.CsvDataSource;
-import it.hella.aggregator.reactive.csv.CsvDataSourceTest;
+import it.hella.reactive.csv.CsvDataSource;
+import it.hella.reactive.csv.CsvDataSourceTest;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,7 +54,7 @@ public class PipelineTest {
                 <String[]>builder().
                 mapper(Function.identity()).
                 build();
-        Pipeline<String[], Integer> p = Pipeline.<String[], Integer>builder().csvDataSource(csvDataSource).
+        Pipeline<String[]> p = Pipeline.<String[]>builder().csvDataSource(csvDataSource).
                 aggregator(testAggregator).build();
         p.aggregate(records, r -> {/*running in another thread*/});
 
@@ -79,10 +79,10 @@ public class PipelineTest {
                 <String[]>builder().
                 mapper(Function.identity()).
                 build();
-        Pipeline.PipelineBuilder<String[], Integer> builder = Pipeline.
-                <String[], Integer>builder().csvDataSource(csvDataSource);
+        Pipeline.PipelineBuilder<String[]> builder = Pipeline.
+                <String[]>builder().csvDataSource(csvDataSource);
         aggregators.forEach(builder::aggregator);
-        Pipeline<String[], Integer> p = builder.build();
+        Pipeline<String[]> p = builder.build();
 
         p.aggregate(records, a -> threads.add(((TestAggregator)a).getThreadName()));
         aggregators.forEach(a -> {
@@ -108,7 +108,7 @@ public class PipelineTest {
                 <String[]>builder().
                 mapper(Function.identity()).
                 build();
-        Pipeline<String[], Integer> p = Pipeline.<String[], Integer>builder().csvDataSource(csvDataSource).
+        Pipeline<String[]> p = Pipeline.<String[]>builder().csvDataSource(csvDataSource).
                 aggregator(testAggregator).build();
         p.getResult("test_aggregator");
 
@@ -125,7 +125,7 @@ public class PipelineTest {
                 <String[]>builder().
                 mapper(Function.identity()).
                 build();
-        Pipeline<String[], Integer> p = Pipeline.<String[], Integer>builder().csvDataSource(csvDataSource).
+        Pipeline<String[]> p = Pipeline.<String[]>builder().csvDataSource(csvDataSource).
                 aggregator(testAggregator).build();
         p.aggregate(path, v -> {
         });
@@ -141,7 +141,7 @@ public class PipelineTest {
                     <String[]>builder().
                     mapper(Function.identity()).
                     build();
-            Pipeline<String[], String> p = Pipeline.<String[], String>builder().csvDataSource(csvDataSource).
+            Pipeline<String[]> p = Pipeline.<String[]>builder().csvDataSource(csvDataSource).
                     aggregator(new Aggregator<String[], String>("names", "") {
                         @Override
                         public void accept(String[] o) {
@@ -158,7 +158,7 @@ public class PipelineTest {
                             }
                         }
                     }).build();
-            p.aggregate(path, a -> log.info(a.getValue()));
+            p.aggregate(path, a -> log.info((String)a.getValue()));
             try {
                 Thread.sleep(100);
             } catch (Exception e) {

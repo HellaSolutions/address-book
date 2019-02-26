@@ -1,4 +1,4 @@
-package it.hella.aggregator.reactive.csv;
+package it.hella.reactive.csv;
 
 import it.hella.addressbook.test.util.DataBox;
 import org.junit.BeforeClass;
