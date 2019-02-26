@@ -1,7 +1,6 @@
 package it.hella.aggregator.reactive.csv;
 
 import it.hella.addressbook.test.util.DataBox;
-import it.hella.aggregator.PipelineTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;

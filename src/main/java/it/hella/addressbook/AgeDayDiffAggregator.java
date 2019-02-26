@@ -3,12 +3,12 @@ package it.hella.addressbook;
 import it.hella.aggregator.Aggregator;
 
 import java.time.LocalDate;
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
 
 /**
  * The type Age day diff aggregator.
  */
-public class AgeDayDiffAggregator extends Aggregator<Address, Integer> {
+public class AgeDayDiffAggregator extends Aggregator<Address, Long> {
 
     private String nameA;
     private String nameB;
@@ -25,7 +25,7 @@ public class AgeDayDiffAggregator extends Aggregator<Address, Integer> {
      * @param nameB the name b
      */
     public AgeDayDiffAggregator(String nameA, String nameB){
-        super("ageday_diff_counter", -1);
+        super("ageday_diff_counter", -1L);
         this.nameA = nameA;
         this.nameB = nameB;
     }
@@ -42,7 +42,7 @@ public class AgeDayDiffAggregator extends Aggregator<Address, Integer> {
             dateOfBirthB = address.getBirthDate();
         }
         if (dateOfBirthA != null && dateOfBirthB != null){
-            super.setValue(Math.abs(Period.between(dateOfBirthA, dateOfBirthB).getDays()));
+            super.setValue(Math.abs(ChronoUnit.DAYS.between(dateOfBirthA, dateOfBirthB)));
         }
 
     }

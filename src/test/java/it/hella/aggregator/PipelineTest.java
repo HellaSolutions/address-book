@@ -17,8 +17,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
 
 public class PipelineTest {
 

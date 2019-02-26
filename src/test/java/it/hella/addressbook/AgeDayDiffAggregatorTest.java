@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class AgeDayDiffAggregatorTest {
 
@@ -27,7 +27,7 @@ public class AgeDayDiffAggregatorTest {
                         LocalDate.of(1931, 1, 1))
         );
         data.forEach(ageDayDiffAggregator::accept);
-        assertEquals(Integer.valueOf(0), ageDayDiffAggregator.getValue());
+        assertEquals(Long.valueOf(0), ageDayDiffAggregator.getValue());
     }
 
     @Test
@@ -39,7 +39,7 @@ public class AgeDayDiffAggregatorTest {
                         LocalDate.of(1931, 1, 1))
         );
         data.forEach(ageDayDiffAggregator::accept);
-        assertEquals(Integer.valueOf(9), ageDayDiffAggregator.getValue());
+        assertEquals(Long.valueOf(9), ageDayDiffAggregator.getValue());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class AgeDayDiffAggregatorTest {
                         LocalDate.of(1931, 1, 1))
         );
         data.forEach(ageDayDiffAggregator::accept);
-        assertEquals(Integer.valueOf(9), ageDayDiffAggregator.getValue());
+        assertEquals(Long.valueOf(9), ageDayDiffAggregator.getValue());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class AgeDayDiffAggregatorTest {
                         LocalDate.of(1931, 1, 1))
         );
         data.forEach(ageDayDiffAggregator::accept);
-        assertEquals(Integer.valueOf(-1), ageDayDiffAggregator.getValue());
+        assertEquals(Long.valueOf(-1), ageDayDiffAggregator.getValue());
     }
 
     @Test
@@ -75,7 +75,7 @@ public class AgeDayDiffAggregatorTest {
                         LocalDate.of(1931, 1, 1))
         );
         data.forEach(ageDayDiffAggregator::accept);
-        assertEquals(Integer.valueOf(-1), ageDayDiffAggregator.getValue());
+        assertEquals(Long.valueOf(-1), ageDayDiffAggregator.getValue());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class AgeDayDiffAggregatorTest {
                         LocalDate.of(1931, 1, 1))
         );
         data.forEach(ageDayDiffAggregator::accept);
-        assertEquals(Integer.valueOf(-1), ageDayDiffAggregator.getValue());
+        assertEquals(Long.valueOf(-1), ageDayDiffAggregator.getValue());
     }
 
     @Test
@@ -107,7 +107,7 @@ public class AgeDayDiffAggregatorTest {
                         LocalDate.of(1931, 1, 10))
         );
         data.forEach(ageDayDiffAggregator::accept);
-        assertEquals(Integer.valueOf(9), ageDayDiffAggregator.getValue());
+        assertEquals(Long.valueOf(9), ageDayDiffAggregator.getValue());
     }
 
     @Test
@@ -120,6 +120,6 @@ public class AgeDayDiffAggregatorTest {
                         LocalDate.of(1931, 1, 1))
         );
         data.forEach(ageDayDiffAggregator::accept);
-        assertEquals(Integer.valueOf(9), ageDayDiffAggregator.getValue());
+        assertEquals(Long.valueOf(9), ageDayDiffAggregator.getValue());
     }
 }

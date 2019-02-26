@@ -1,5 +1,8 @@
 package it.hella.addressbook.test.util;
 
+import it.hella.addressbook.Address;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.time.LocalDate;
@@ -9,18 +12,6 @@ import java.util.List;
 import java.util.Random;
 
 public class DataBox {
-
-    public static final List<String> getCsvAddressBook(int numberOfRecords, int maleNumber) {
-        return null;
-    }
-
-    public static final List<String> getCsvAddressBookMaxAge(int numberOfRecords, int maxAge) {
-        return null;
-    }
-
-    public static final List<String> getCsvAddressBook(int numberOfRecords, String nameA, String nameB, int dayAgeDiff) {
-        return null;
-    }
 
     public static final List<String> getRandomCsvAddressBook(int numberOfRecords, String separator) {
         List<String> records = new ArrayList<>();
@@ -51,6 +42,28 @@ public class DataBox {
                         .append(date.getMonthValue())
                         .append("/")
                         .append(String.valueOf(date.getYear()).substring(2)).toString();
+    }
+
+    public static String toCsvDate(LocalDate localDate) {
+        return new StringBuffer()
+                .append(localDate.getDayOfMonth())
+                .append("/")
+                .append(localDate.getMonthValue())
+                .append("/")
+                .append(String.valueOf(localDate.getYear()).substring(2))
+                .toString();
+    }
+
+    public static String toCsvFormat(Address address) {
+        return new StringBuffer()
+                .append(address.getName())
+                .append(" ")
+                .append(address.getSurname())
+                .append(",")
+                .append(address.getGender())
+                .append(",")
+                .append(toCsvDate(address.getBirthDate()))
+                .toString();
     }
 
 }
