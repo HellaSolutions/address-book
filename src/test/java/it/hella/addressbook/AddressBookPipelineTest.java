@@ -21,14 +21,14 @@ import static it.hella.addressbook.test.util.DataBox.toCsvFormat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public class AddressBookPipelineTest {
 
     private static Logger log = LoggerFactory.getLogger(AddressBookPipelineTest.class);
 
     private static final int RANDOM_SAMPLE_SIZE = 1000;
-    private static final int MASSIVE_SAMPLE_SIZE = 1000000;
+    //Parsed 10000000 records in 37 secs on i7 - 16Mb
+    private static final int MASSIVE_SAMPLE_SIZE = 100000;
 
     private static final ClassLoader classLoader = CsvDataSourceTest.class.getClassLoader();
 
@@ -70,7 +70,7 @@ public class AddressBookPipelineTest {
         p.aggregate(path, a -> {
             values.add((Integer)a.getValue());
         });
-        try {Thread.sleep(100); }catch(Exception e){}
+        p.await();
         assertEquals(Integer.valueOf(3), values.get(0));
 
     }
@@ -85,7 +85,7 @@ public class AddressBookPipelineTest {
         p.aggregate(path, a -> {
             values.add((Address)a.getValue());
         });
-        try {Thread.sleep(100); }catch(Exception e){}
+        p.await();
         assertEquals(new AddressBookMapper().apply(new String[]{"Wes Jackson", "Male", "14/08/74"}),
                 values.get(0));
 
@@ -101,7 +101,7 @@ public class AddressBookPipelineTest {
         p.aggregate(path, a -> {
             values.add((Long)a.getValue());
         });
-        try {Thread.sleep(100); }catch(Exception e){}
+        p.await();
         assertEquals(Long.valueOf(2862),
                 values.get(0));
 
@@ -118,8 +118,7 @@ public class AddressBookPipelineTest {
                 aggregator(new CountMalesAggregator()).
                 build();
         p.aggregate(path, a -> values.put(a.getName(), a.getValue()));
-
-        try {Thread.sleep(100); }catch(Exception e){}
+        p.await();
         assertEquals(Long.valueOf(2862),
                 values.get("ageday_diff_counter"));
         assertEquals(Integer.valueOf(3),
@@ -128,10 +127,12 @@ public class AddressBookPipelineTest {
                 values.get("age_max"));
 
     }
+
     @Test
     public void MassiveTestAggregators() {
 
         List<String> sample = DataBox.getRandomCsvAddressBook(MASSIVE_SAMPLE_SIZE, ",");
+        log.info(String.format("created massive sample"));
         final Map<String, Object> values = new HashMap<>();
         Pipeline<Address> p = Pipeline.<Address>builder().
                 csvDataSource(csvDataSource).
@@ -144,10 +145,10 @@ public class AddressBookPipelineTest {
 
         StopWatch stopwatch = StopWatch.createStarted();
         p.aggregate(sample, a -> values.put(a.getName(), a.getValue()));
-
-        log.info(String.format("age_max %s", p.getResult("age_max")));
-        log.info(String.format("males_counter %s", p.getResult("males_counter")));
-        log.info(String.format("ageday_diff_counter %s", p.getResult("ageday_diff_counter")));
+        p.await();
+        log.info(String.format("age_max %s", values.get(MaxAgeAggregator.NAME)));
+        log.info(String.format("males_counter %s", values.get(CountMalesAggregator.NAME)));
+        log.info(String.format("ageday_diff_counter %s", values.get(AgeDayDiffAggregator.NAME)));
         stopwatch.stop();
         log.info(String.format("parsed %d records in %s seconds", MASSIVE_SAMPLE_SIZE, stopwatch.getTime(TimeUnit.SECONDS)));
 

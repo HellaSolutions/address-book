@@ -1,8 +1,6 @@
 package it.hella.addressbook.test.util;
 
 import it.hella.addressbook.Address;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.time.LocalDate;

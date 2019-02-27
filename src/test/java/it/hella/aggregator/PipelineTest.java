@@ -13,11 +13,13 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
@@ -29,7 +31,7 @@ public class PipelineTest {
     private static final int NUM_CONCURRENT_AGGREGATORS = 50;
 
     public static final Integer numberSynchronizationTests = 1;
-    public static final Integer randomDelayBound = 10;
+    public static final Integer randomDelayBound = 1000;
 
     private static final ClassLoader classLoader = CsvDataSourceTest.class.getClassLoader();
 
@@ -58,7 +60,7 @@ public class PipelineTest {
                 aggregator(testAggregator).build();
         p.aggregate(records, r -> {/*running in another thread*/});
 
-        p.getResult("test_aggregator");
+        p.await();
         assertThat(testAggregator.getReceived().
                 stream().map(r -> r[0] + "," + r[1] + "," + r[2]).collect(Collectors.toList()), is(records));
         assertEquals(Integer.valueOf(RANDOM_SAMPLE_SIZE), testAggregator.getValue());
@@ -85,8 +87,8 @@ public class PipelineTest {
         Pipeline<String[]> p = builder.build();
 
         p.aggregate(records, a -> threads.add(((TestAggregator)a).getThreadName()));
+        p.await();
         aggregators.forEach(a -> {
-                    p.getResult(a.getName());
                     assertThat(a.getReceived().
                             stream().map(r -> r[0] + "," + r[1] + "," + r[2]).collect(Collectors.toList()), is(records));
                     assertEquals(Integer.valueOf(RANDOM_SAMPLE_SIZE), a.getValue());
@@ -94,42 +96,6 @@ public class PipelineTest {
         );
         assertTrue(threads.size() > 1);
         log.info(String.format("Runned %s aggregators on %s threads", NUM_CONCURRENT_AGGREGATORS, threads.size()));
-
-    }
-
-    @Test
-    public void testQueryResultsBeforeAggregate() {
-
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage(containsString("aggregate method"));
-
-        TestAggregator<String[]> testAggregator = new TestAggregator<>("test_aggregator");
-        CsvDataSource<String[]> csvDataSource = CsvDataSource.
-                <String[]>builder().
-                mapper(Function.identity()).
-                build();
-        Pipeline<String[]> p = Pipeline.<String[]>builder().csvDataSource(csvDataSource).
-                aggregator(testAggregator).build();
-        p.getResult("test_aggregator");
-
-    }
-
-    @Test
-    public void testWrongAggregateName() {
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(containsString("testaggregator"));
-
-        TestAggregator<String[]> testAggregator = new TestAggregator<>("test_aggregator");
-        CsvDataSource<String[]> csvDataSource = CsvDataSource.
-                <String[]>builder().
-                mapper(Function.identity()).
-                build();
-        Pipeline<String[]> p = Pipeline.<String[]>builder().csvDataSource(csvDataSource).
-                aggregator(testAggregator).build();
-        p.aggregate(path, v -> {
-        });
-        p.getResult("testaggregator");
 
     }
 
@@ -152,17 +118,10 @@ public class PipelineTest {
                         @Override
                         public void accept(String[] o) {
                             this.setValue(this.getValue() + o[1]);
-                            try {
-                                Thread.sleep(new Random().nextInt(randomDelayBound));
-                            } catch (Exception e) {
-                            }
                         }
                     }).build();
             p.aggregate(path, a -> log.info((String)a.getValue()));
-            try {
-                Thread.sleep(100);
-            } catch (Exception e) {
-            }
+            p.await();
 
         }
     }

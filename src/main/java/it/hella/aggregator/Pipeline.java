@@ -20,7 +20,6 @@ import java.util.function.Consumer;
  * The type Pipeline.
  *
  * @param <T> the type parameter
- * @param <V> the type parameter
  */
 @Builder
 public class Pipeline<T> {
@@ -30,13 +29,13 @@ public class Pipeline<T> {
      */
     @Singular
     @NonNull
-    List<Aggregator<T, ?>> aggregators;
+    private List<Aggregator<T, ?>> aggregators;
 
     /**
      * The Csv data source.
      */
     @NonNull
-    CsvDataSource<T> csvDataSource;
+    private CsvDataSource<T> csvDataSource;
 
     private Map<String, DisposableIndex> subscribers;
 
@@ -62,7 +61,6 @@ public class Pipeline<T> {
 
         private FluxSink<Aggregator<T, ?>> sink;
         private AtomicInteger activeAggregators;
-
         /**
          * Set sink.
          *
@@ -85,6 +83,11 @@ public class Pipeline<T> {
                 sink.complete();
             }
         }
+
+        boolean isCompleted() {
+            return activeAggregators.get() == 0;
+        }
+
     }
     private final AggregatorListener listener = new AggregatorListener();
 
@@ -138,26 +141,9 @@ public class Pipeline<T> {
         flux.subscribe(consumer);
     }
 
-    /**
-     * Blocking utility method that retrieves the value computed from a named Aggregator.
-     * Used in tests to avoid time-wasting Thread.sleep calls
-     *
-     * @param name the name
-     * @return the result
-     */
-    public Object getResult(String name) {
-        if (subscribers == null){
-            throw new IllegalStateException(String.format("No subscribers, you have to call the aggregate method before"));
-        }
-        if (subscribers.containsKey(name)){
-            DisposableIndex disposableIndex = subscribers.get(name);
-            while(!disposableIndex.getDisposable().isDisposed()){}
-            return aggregators.get(disposableIndex.getAggregatorIndex()).getValue();
-        }else{
-            throw new IllegalArgumentException(String.format("Unrecognized aggregator id: " + name));
-        }
+    public void await(){
+        while(!listener.isCompleted()){}
     }
-
 
 }
 

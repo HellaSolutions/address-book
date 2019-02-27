@@ -29,18 +29,18 @@ public class AddressBookMapper implements Function<String[], Address> {
     @Override
     public Address apply(String[] record) {
         if (record == null || record.length != 3){
-            log.warn(String.format("Badly formatted record %s",  Arrays.toString(record)));
+            log.warn("Badly formatted record {}",  Arrays.toString(record));
             return Address.EMPTY;
         }
         String[] saferDate = record[2].trim().split("/");
         LocalDate dateOfBirth = null;
         if (!validate(saferDate) || (dateOfBirth = opinionatedDate(saferDate)) == null){
-            log.warn(String.format("Badly formatted date %s",  record[2]));
+            log.warn("Badly formatted date {}",  record[2]);
             return Address.EMPTY;
         }
         String[] nameSurname = record[0].split(" ");
         if (nameSurname.length != 2){
-            log.warn(String.format("Csv name bad format %s", Arrays.toString(nameSurname)));
+            log.warn("Csv name bad format {}", Arrays.toString(nameSurname));
             return Address.EMPTY;
         }
         return new Address(nameSurname[0].trim(), nameSurname[1].trim(), record[1].trim(), dateOfBirth);

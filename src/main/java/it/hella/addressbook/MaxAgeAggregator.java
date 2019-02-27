@@ -6,9 +6,12 @@ import java.time.LocalDate;
 
 public class MaxAgeAggregator extends Aggregator<Address, Address> {
 
+    public static final String NAME = "age_max";
+    private static final String NO_DATA = "NO_DATA";
+
     public MaxAgeAggregator(){
-        super("age_max",
-                new Address("NO_DATA", "NO_DATA", "NO_DATA", LocalDate.now()));
+        super(NAME,
+                new Address(NO_DATA, NO_DATA, NO_DATA, LocalDate.now()));
     }
 
     @Override

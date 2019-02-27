@@ -4,8 +4,10 @@ import it.hella.aggregator.Aggregator;
 
 public class CountMalesAggregator extends Aggregator<Address, Integer> {
 
+    public static final String NAME = "males_counter";
+
     public CountMalesAggregator(){
-        super("males_counter", 0);
+        super(NAME, 0);
     }
 
     @Override

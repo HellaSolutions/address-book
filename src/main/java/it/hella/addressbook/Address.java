@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @ToString
 public class Address {
 
-    public static Address EMPTY = new Address(null, null, null, null);
+    public static final Address EMPTY = new Address(null, null, null, null);
 
     private String name;
     private String surname;

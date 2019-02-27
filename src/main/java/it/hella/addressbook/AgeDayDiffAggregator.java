@@ -4,11 +4,14 @@ import it.hella.aggregator.Aggregator;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 /**
  * The type Age day diff aggregator.
  */
 public class AgeDayDiffAggregator extends Aggregator<Address, Long> {
+
+    public static final String NAME = "ageday_diff_counter";
 
     private String nameA;
     private String nameB;
@@ -25,7 +28,7 @@ public class AgeDayDiffAggregator extends Aggregator<Address, Long> {
      * @param nameB the name b
      */
     public AgeDayDiffAggregator(String nameA, String nameB){
-        super("ageday_diff_counter", -1L);
+        super(NAME, -1L);
         this.nameA = nameA;
         this.nameB = nameB;
     }
@@ -45,5 +48,20 @@ public class AgeDayDiffAggregator extends Aggregator<Address, Long> {
             super.setValue(Math.abs(ChronoUnit.DAYS.between(dateOfBirthA, dateOfBirthB)));
         }
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        AgeDayDiffAggregator that = (AgeDayDiffAggregator) o;
+        return Objects.equals(nameA, that.nameA) &&
+                Objects.equals(nameB, that.nameB);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), nameA, nameB);
     }
 }
