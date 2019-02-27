@@ -27,7 +27,7 @@ public class AddressBookPipelineTest {
     private static Logger log = LoggerFactory.getLogger(AddressBookPipelineTest.class);
 
     private static final int RANDOM_SAMPLE_SIZE = 1000;
-    //Parsed 10000000 records in 37 secs on i7 - 16Mb
+    //Parsed 1E7 in memory records in 37 secs on i7 - 16Gb
     private static final int MASSIVE_SAMPLE_SIZE = 100000;
 
     private static final ClassLoader classLoader = CsvDataSourceTest.class.getClassLoader();

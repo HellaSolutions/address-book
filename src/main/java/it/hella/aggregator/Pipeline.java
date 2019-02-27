@@ -60,7 +60,7 @@ public class Pipeline<T> {
     private class AggregatorListener {
 
         private FluxSink<Aggregator<T, ?>> sink;
-        private AtomicInteger activeAggregators;
+        private AtomicInteger activeAggregators = new AtomicInteger(0);
         /**
          * Set sink.
          *
