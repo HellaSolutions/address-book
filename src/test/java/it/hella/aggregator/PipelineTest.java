@@ -10,9 +10,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.ConnectableFlux;
+import reactor.core.publisher.Flux;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +26,9 @@ import java.util.stream.Collectors;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
+/**
+ * The type Pipeline test.
+ */
 public class PipelineTest {
 
     private static Logger log = LoggerFactory.getLogger(PipelineTest.class);
@@ -30,22 +36,37 @@ public class PipelineTest {
     private static final int RANDOM_SAMPLE_SIZE = 1000;
     private static final int NUM_CONCURRENT_AGGREGATORS = 50;
 
+    /**
+     * The constant numberSynchronizationTests.
+     */
     public static final Integer numberSynchronizationTests = 1;
+    /**
+     * The constant randomDelayBound.
+     */
     public static final Integer randomDelayBound = 1000;
 
     private static final ClassLoader classLoader = CsvDataSourceTest.class.getClassLoader();
 
     private static Path path;
 
+    /**
+     * The Thrown.
+     */
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
 
+    /**
+     * Before class.
+     */
     @BeforeClass
     public static void beforeClass() {
         path = Paths.get(classLoader.getResource("AddressBook.txt").getPath().substring(1));
     }
 
+    /**
+     * Test aggregator receives all records.
+     */
     @Test
     public void testAggregatorReceivesAllRecords() {
 
@@ -66,13 +87,14 @@ public class PipelineTest {
         assertEquals(Integer.valueOf(RANDOM_SAMPLE_SIZE), testAggregator.getValue());
     }
 
+    /**
+     * Test multiple aggregators concurrency and broad casting.
+     */
     @Test
     public void testMultipleAggregatorsConcurrencyAndBroadCasting() {
 
-        List<TestAggregator<String[]>> aggregators = new ArrayList<>();
-        for (int c = 0; c < NUM_CONCURRENT_AGGREGATORS; c++) {
-            aggregators.add(new TestAggregator<>("test_aggregator_" + c));
-        }
+        List<TestAggregator<String[]>> aggregators =
+            TestAggregator.getTestAggregators(NUM_CONCURRENT_AGGREGATORS);
         //Stores the concurrent threads the aggregators are working on
         Set<String> threads = new HashSet<>();
         List<String> records =
@@ -99,6 +121,9 @@ public class PipelineTest {
 
     }
 
+    /**
+     * Builder asynchronous collect test.
+     */
     @Test
     public void builderAsynchronousCollectTest() {
 

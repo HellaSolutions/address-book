@@ -22,20 +22,29 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+/**
+ * The type Address book pipeline test.
+ */
 public class AddressBookPipelineTest {
 
     private static Logger log = LoggerFactory.getLogger(AddressBookPipelineTest.class);
 
     private static final int RANDOM_SAMPLE_SIZE = 1000;
-    //Parsed 1E7 in memory records in 37 secs on i7 - 16Gb
+    //Parsed 1E7 in-memory records in 37 secs on i7 - 16Gb
     private static final int MASSIVE_SAMPLE_SIZE = 100000;
 
     private static final ClassLoader classLoader = CsvDataSourceTest.class.getClassLoader();
 
     private static Path path;
 
+    /**
+     * The Csv data source.
+     */
     static CsvDataSource<Address> csvDataSource;
 
+    /**
+     * Before class.
+     */
     @BeforeClass
     public static void beforeClass() {
         path = Paths.get(classLoader.getResource("AddressBook.txt").getPath().substring(1));
@@ -45,6 +54,9 @@ public class AddressBookPipelineTest {
                 build();
     }
 
+    /**
+     * Test mapper.
+     */
     @Test
     public void testMapper() {
 
@@ -60,6 +72,9 @@ public class AddressBookPipelineTest {
 
     }
 
+    /**
+     * Test male counter.
+     */
     @Test
     public void testMaleCounter() {
 
@@ -75,6 +90,9 @@ public class AddressBookPipelineTest {
 
     }
 
+    /**
+     * Test max age counter.
+     */
     @Test
     public void testMaxAgeCounter() {
 
@@ -91,6 +109,9 @@ public class AddressBookPipelineTest {
 
     }
 
+    /**
+     * Age day diff aggregator.
+     */
     @Test
     public void AgeDayDiffAggregator() {
 
@@ -107,6 +128,9 @@ public class AddressBookPipelineTest {
 
     }
 
+    /**
+     * All aggregators.
+     */
     @Test
     public void AllAggregators() {
 
@@ -128,6 +152,9 @@ public class AddressBookPipelineTest {
 
     }
 
+    /**
+     * Massive test aggregators.
+     */
     @Test
     public void MassiveTestAggregators() {
 

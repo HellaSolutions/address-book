@@ -9,8 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The type Data box.
+ */
 public class DataBox {
 
+    /**
+     * Gets random csv address book.
+     *
+     * @param numberOfRecords the number of records
+     * @param separator       the separator
+     * @return the random csv address book
+     */
     public static final List<String> getRandomCsvAddressBook(int numberOfRecords, String separator) {
         List<String> records = new ArrayList<>();
         for (int k = 0; k < numberOfRecords; k++){
@@ -19,6 +29,12 @@ public class DataBox {
         return records;
     }
 
+    /**
+     * Random record string.
+     *
+     * @param separator the separator
+     * @return the string
+     */
     public static final String randomRecord(String separator) {
         Random r = new Random();
         return new StringBuffer()
@@ -31,6 +47,11 @@ public class DataBox {
                 .append(randomBirthday()).toString();
     }
 
+    /**
+     * Random birthday string.
+     *
+     * @return the string
+     */
     public static String randomBirthday() {
         LocalDate date = LocalDate.now().
                 minus(Period.ofDays((new Random().nextInt(365 * 70))));
@@ -42,6 +63,12 @@ public class DataBox {
                         .append(String.valueOf(date.getYear()).substring(2)).toString();
     }
 
+    /**
+     * To csv date string.
+     *
+     * @param localDate the local date
+     * @return the string
+     */
     public static String toCsvDate(LocalDate localDate) {
         return new StringBuffer()
                 .append(localDate.getDayOfMonth())
@@ -52,6 +79,12 @@ public class DataBox {
                 .toString();
     }
 
+    /**
+     * To csv format string.
+     *
+     * @param address the address
+     * @return the string
+     */
     public static String toCsvFormat(Address address) {
         return new StringBuffer()
                 .append(address.getName())

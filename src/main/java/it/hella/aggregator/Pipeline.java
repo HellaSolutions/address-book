@@ -60,7 +60,8 @@ public class Pipeline<T> {
     private class AggregatorListener {
 
         private FluxSink<Aggregator<T, ?>> sink;
-        private AtomicInteger activeAggregators = new AtomicInteger(0);
+        private AtomicInteger activeAggregators;
+
         /**
          * Set sink.
          *
@@ -72,7 +73,7 @@ public class Pipeline<T> {
         }
 
         /**
-         * Complete.
+         * Called when an aggregator is completed.
          *
          * @param name the name
          */
@@ -84,6 +85,11 @@ public class Pipeline<T> {
             }
         }
 
+        /**
+         * Is completed boolean.
+         *
+         * @return the boolean
+         */
         boolean isCompleted() {
             return activeAggregators.get() == 0;
         }
@@ -92,12 +98,12 @@ public class Pipeline<T> {
     private final AggregatorListener listener = new AggregatorListener();
 
     /**
-     * Aggregate.
+     * Aggregate an in-memory data set.
      *
      * @param records  the records as iterable
      * @param consumer the consumer for a Flux of completed Aggregators
      */
-    public void aggregate(List<String> records, Consumer<Aggregator<T,?>> consumer) {
+    public void aggregate(Iterable<String> records, Consumer<Aggregator<T,?>> consumer) {
 
         runPipeline(csvDataSource.
                 stream(records).publish(), consumer);
@@ -105,7 +111,7 @@ public class Pipeline<T> {
     }
 
     /**
-     * Aggregate.
+     * Aggregate a data set from disk.
      *
      * @param path     the records as a CSV file
      * @param consumer the consumer for a Flux of completed Aggregators
@@ -132,18 +138,25 @@ public class Pipeline<T> {
             subscribers.put(c.getName(), disposableIndex);
             n++;
         }
-        listenerFlux(consumer);
+        ConnectableFlux<Aggregator<T, ?>> fluxListener = fluxListener(consumer);
+        fluxListener.connect();
         connectableFlux.connect();
+
     }
 
-    private void listenerFlux(Consumer<Aggregator<T, ?>> consumer) {
-        Flux<Aggregator<T, ?>> flux = Flux.create(listener::setSink, FluxSink.OverflowStrategy.BUFFER);
-        flux.subscribe(consumer);
+    private ConnectableFlux<Aggregator<T, ?>> fluxListener(Consumer<Aggregator<T, ?>> consumer) {
+        ConnectableFlux<Aggregator<T, ?>> connectableFlux =
+                Flux.create(listener::setSink, FluxSink.OverflowStrategy.BUFFER)
+                .publish();
+        connectableFlux.subscribe(consumer);
+        return connectableFlux;
     }
 
+    /**
+     * Blocks until all aggregators are finished
+     */
     public void await(){
         while(!listener.isCompleted()){}
     }
 
 }
-

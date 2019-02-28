@@ -39,12 +39,36 @@ public class TestAggregator<T> extends Aggregator<T, Integer> {
         super.setValue(received.size());
     }
 
+    /**
+     * Gets received.
+     *
+     * @return the received
+     */
     public List<T> getReceived() {
         return received;
     }
 
+    /**
+     * Gets thread name.
+     *
+     * @return the thread name
+     */
     public String getThreadName() {
         return threadName;
+    }
+
+    /**
+     * Get test aggregators list.
+     *
+     * @param numberAggregators the number aggregators
+     * @return the list
+     */
+    public static final List<TestAggregator<String[]>> getTestAggregators(int numberAggregators){
+        List<TestAggregator<String[]>> aggregators = new ArrayList<>();
+        for (int c = 0; c < numberAggregators; c++) {
+            aggregators.add(new TestAggregator<>("test_aggregator_" + c));
+        }
+        return aggregators;
     }
 
 }

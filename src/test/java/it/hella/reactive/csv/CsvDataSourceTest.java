@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+/**
+ * The type Csv data source test.
+ */
 public class CsvDataSourceTest {
 
     private static Logger log = LoggerFactory.getLogger(CsvDataSourceTest.class);
@@ -30,11 +33,17 @@ public class CsvDataSourceTest {
 
     private static Path path;
 
+    /**
+     * Before class.
+     */
     @BeforeClass
     public static void beforeClass(){
         path = Paths.get(classLoader.getResource("AddressBook.txt").getPath().substring(1));
     }
 
+    /**
+     * Test empty data source.
+     */
     @Test
     public void testEmptyDataSource() {
 
@@ -49,6 +58,9 @@ public class CsvDataSourceTest {
 
     }
 
+    /**
+     * Test sample data source.
+     */
     @Test
     public void testSampleDataSource() {
 
@@ -67,6 +79,9 @@ public class CsvDataSourceTest {
 
     }
 
+    /**
+     * Test mapped data source.
+     */
     @Test
     public void testMappedDataSource() {
 
@@ -91,6 +106,9 @@ public class CsvDataSourceTest {
 
     }
 
+    /**
+     * Test random data source.
+     */
     @Test
     public void testRandomDataSource(){
         List<String> records =
@@ -110,6 +128,9 @@ public class CsvDataSourceTest {
                 verifyComplete();
     }
 
+    /**
+     * Test random data source separator.
+     */
     @Test
     public void testRandomDataSourceSeparator(){
         List<String> records =

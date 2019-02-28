@@ -9,15 +9,27 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * The type Age day diff aggregator test.
+ */
 public class AgeDayDiffAggregatorTest {
 
+    /**
+     * The Age day diff aggregator.
+     */
     AgeDayDiffAggregator ageDayDiffAggregator;
 
+    /**
+     * Before.
+     */
     @Before
     public void before() {
         ageDayDiffAggregator = new AgeDayDiffAggregator("A", "B");
     }
 
+    /**
+     * Test correct zero difference.
+     */
     @Test
     public void testCorrectZeroDifference(){
         List<Address> data = Arrays.asList(
@@ -30,6 +42,9 @@ public class AgeDayDiffAggregatorTest {
         assertEquals(Long.valueOf(0), ageDayDiffAggregator.getValue());
     }
 
+    /**
+     * Test correct non zero difference.
+     */
     @Test
     public void testCorrectNonZeroDifference(){
         List<Address> data = Arrays.asList(
@@ -42,6 +57,9 @@ public class AgeDayDiffAggregatorTest {
         assertEquals(Long.valueOf(9), ageDayDiffAggregator.getValue());
     }
 
+    /**
+     * Test correct non zero difference order irrelevant.
+     */
     @Test
     public void testCorrectNonZeroDifferenceOrderIrrelevant(){
         List<Address> data = Arrays.asList(
@@ -54,6 +72,9 @@ public class AgeDayDiffAggregatorTest {
         assertEquals(Long.valueOf(9), ageDayDiffAggregator.getValue());
     }
 
+    /**
+     * Test no ab pair.
+     */
     @Test
     public void testNoABPair(){
         List<Address> data = Arrays.asList(
@@ -66,6 +87,9 @@ public class AgeDayDiffAggregatorTest {
         assertEquals(Long.valueOf(-1), ageDayDiffAggregator.getValue());
     }
 
+    /**
+     * Test no a not b pair.
+     */
     @Test
     public void testNoANotBPair(){
         List<Address> data = Arrays.asList(
@@ -78,6 +102,9 @@ public class AgeDayDiffAggregatorTest {
         assertEquals(Long.valueOf(-1), ageDayDiffAggregator.getValue());
     }
 
+    /**
+     * Test not ab pair.
+     */
     @Test
     public void testNotABPair(){
         List<Address> data = Arrays.asList(
@@ -90,6 +117,9 @@ public class AgeDayDiffAggregatorTest {
         assertEquals(Long.valueOf(-1), ageDayDiffAggregator.getValue());
     }
 
+    /**
+     * Tes duplicated first taken.
+     */
     @Test
     public void tesDuplicatedFirstTaken(){
         List<Address> data = Arrays.asList(
@@ -110,12 +140,15 @@ public class AgeDayDiffAggregatorTest {
         assertEquals(Long.valueOf(9), ageDayDiffAggregator.getValue());
     }
 
+    /**
+     * Test invalid records insensitive.
+     */
     @Test
     public void testInvalidRecordsInsensitive(){
         List<Address> data = Arrays.asList(
                 new Address("B", "surname", "male",
                         LocalDate.of(1931, 1, 10)),
-                Address.EMPTY,
+                Address.INVALID,
                 new Address("A", "surname", "male",
                         LocalDate.of(1931, 1, 1))
         );

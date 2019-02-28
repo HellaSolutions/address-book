@@ -11,6 +11,9 @@ import java.util.Objects;
  */
 public class AgeDayDiffAggregator extends Aggregator<Address, Long> {
 
+    /**
+     * NAME of the aggregator
+     */
     public static final String NAME = "ageday_diff_counter";
 
     private String nameA;
@@ -35,7 +38,7 @@ public class AgeDayDiffAggregator extends Aggregator<Address, Long> {
 
     @Override
     public void accept(Address address) {
-        if (address.equals(Address.EMPTY) ||
+        if (address.equals(Address.INVALID) ||
                 (dateOfBirthA != null && dateOfBirthB != null)){
             return;
         }
