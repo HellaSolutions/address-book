@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -152,11 +153,8 @@ public class Pipeline<T> {
         return connectableFlux;
     }
 
-    /**
-     * Blocks until all aggregators are finished
-     */
-    public void await(){
-        while(!listener.isCompleted()){}
+    public Callable<Boolean> complete(){
+        return () -> listener.isCompleted();
     }
 
 }

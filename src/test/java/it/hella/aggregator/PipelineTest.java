@@ -10,19 +10,17 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.ConnectableFlux;
-import reactor.core.publisher.Flux;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
@@ -72,7 +70,7 @@ public class PipelineTest {
                 aggregator(testAggregator).build();
         p.aggregate(records, r -> {/*running in another thread*/});
 
-        p.await();
+        await().timeout(1000, TimeUnit.MILLISECONDS).until(p.complete());
         assertThat(testAggregator.getReceived().
                 stream().map(r -> r[0] + "," + r[1] + "," + r[2]).collect(Collectors.toList()), is(records));
         assertEquals(Integer.valueOf(RANDOM_SAMPLE_SIZE), testAggregator.getValue());
@@ -100,7 +98,8 @@ public class PipelineTest {
         Pipeline<String[]> p = builder.build();
 
         p.aggregate(records, a -> threads.add(((TestAggregator)a).getThreadName()));
-        p.await();
+
+        await().timeout(1000, TimeUnit.MILLISECONDS).until(p.complete());
         aggregators.forEach(a -> {
                     assertThat(a.getReceived().
                             stream().map(r -> r[0] + "," + r[1] + "," + r[2]).collect(Collectors.toList()), is(records));

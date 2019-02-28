@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static it.hella.addressbook.test.util.DataBox.toCsvFormat;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -85,7 +86,7 @@ public class AddressBookPipelineTest {
         p.aggregate(path, a -> {
             values.add((Integer)a.getValue());
         });
-        p.await();
+        await().timeout(1000, TimeUnit.MILLISECONDS).until(p.complete());
         assertEquals(Integer.valueOf(3), values.get(0));
 
     }
@@ -103,7 +104,7 @@ public class AddressBookPipelineTest {
         p.aggregate(path, a -> {
             values.add((Address)a.getValue());
         });
-        p.await();
+        await().timeout(1000, TimeUnit.MILLISECONDS).until(p.complete());
         assertEquals(new AddressBookMapper().apply(new String[]{"Wes Jackson", "Male", "14/08/74"}),
                 values.get(0));
 
@@ -122,7 +123,7 @@ public class AddressBookPipelineTest {
         p.aggregate(path, a -> {
             values.add((Long)a.getValue());
         });
-        p.await();
+        await().timeout(1000, TimeUnit.MILLISECONDS).until(p.complete());
         assertEquals(Long.valueOf(2862),
                 values.get(0));
 
@@ -142,7 +143,7 @@ public class AddressBookPipelineTest {
                 aggregator(new CountMalesAggregator()).
                 build();
         p.aggregate(path, a -> values.put(a.getName(), a.getValue()));
-        p.await();
+        await().timeout(1000, TimeUnit.MILLISECONDS).until(p.complete());
         assertEquals(Long.valueOf(2862),
                 values.get("ageday_diff_counter"));
         assertEquals(Integer.valueOf(3),
@@ -172,7 +173,8 @@ public class AddressBookPipelineTest {
 
         StopWatch stopwatch = StopWatch.createStarted();
         p.aggregate(sample, a -> values.put(a.getName(), a.getValue()));
-        p.await();
+
+        await().timeout(MASSIVE_SAMPLE_SIZE, TimeUnit.MILLISECONDS).until(p.complete());
         log.info(String.format("age_max %s", values.get(MaxAgeAggregator.NAME)));
         log.info(String.format("males_counter %s", values.get(CountMalesAggregator.NAME)));
         log.info(String.format("ageday_diff_counter %s", values.get(AgeDayDiffAggregator.NAME)));
