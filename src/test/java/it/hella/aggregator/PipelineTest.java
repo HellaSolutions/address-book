@@ -36,15 +36,6 @@ public class PipelineTest {
     private static final int RANDOM_SAMPLE_SIZE = 1000;
     private static final int NUM_CONCURRENT_AGGREGATORS = 50;
 
-    /**
-     * The constant numberSynchronizationTests.
-     */
-    public static final Integer numberSynchronizationTests = 1;
-    /**
-     * The constant randomDelayBound.
-     */
-    public static final Integer randomDelayBound = 1000;
-
     private static final ClassLoader classLoader = CsvDataSourceTest.class.getClassLoader();
 
     private static Path path;
@@ -119,36 +110,6 @@ public class PipelineTest {
         assertTrue(threads.size() > 1);
         log.info(String.format("Runned %s aggregators on %s threads", NUM_CONCURRENT_AGGREGATORS, threads.size()));
 
-    }
-
-    /**
-     * Builder asynchronous collect test.
-     */
-    @Test
-    public void builderAsynchronousCollectTest() {
-
-        for (int i = 0; i < numberSynchronizationTests; i++) {
-            CsvDataSource<String[]> csvDataSource = CsvDataSource.
-                    <String[]>builder().
-                    mapper(Function.identity()).
-                    build();
-            Pipeline<String[]> p = Pipeline.<String[]>builder().csvDataSource(csvDataSource).
-                    aggregator(new Aggregator<String[], String>("names", "") {
-                        @Override
-                        public void accept(String[] o) {
-                            this.setValue(this.getValue() + o[0]);
-                        }
-                    }).
-                    aggregator(new Aggregator<String[], String>("sex", "") {
-                        @Override
-                        public void accept(String[] o) {
-                            this.setValue(this.getValue() + o[1]);
-                        }
-                    }).build();
-            p.aggregate(path, a -> log.info((String)a.getValue()));
-            p.await();
-
-        }
     }
 
 }
