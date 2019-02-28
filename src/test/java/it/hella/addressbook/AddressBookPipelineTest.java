@@ -143,6 +143,8 @@ public class AddressBookPipelineTest {
                 aggregator(new CountMalesAggregator()).
                 build();
         p.aggregate(path, a -> values.put(a.getName(), a.getValue()));
+
+
         await().timeout(1000, TimeUnit.MILLISECONDS).until(p.complete());
         assertEquals(Long.valueOf(2862),
                 values.get("ageday_diff_counter"));
