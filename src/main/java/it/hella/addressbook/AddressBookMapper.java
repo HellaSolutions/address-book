@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -56,7 +57,7 @@ public class AddressBookMapper implements Function<String[], Address> {
     }
 
     /*
-    * Dates are incomplete on the CSV file. This is the weaker opinionated choice
+    * Years are two digits on the CSV file, and month can be one or two digits.
     * */
     private LocalDate opinionatedDate(String[] saferDate){
         Integer year = Integer.valueOf(currentYearTwoMostSignificantDigits + saferDate[2]);
