@@ -22,11 +22,12 @@ public class AddressBookMapper implements Function<String[], Address> {
     /**
      * The most significant digits of the current year.
      */
-    static String currentYearTwoMostSignificantDigits;
+    private String currentYearTwoMostSignificantDigits;
 
-    static{
-        //still valid for about 8000 years (I hope)
-        currentYearTwoMostSignificantDigits = String.valueOf(LocalDate.now().getYear()).substring(0, 2);
+
+    public AddressBookMapper() {
+        currentYearTwoMostSignificantDigits =
+                String.valueOf(LocalDate.now().getYear()).substring(0, 2);
     }
 
     @Override
